@@ -4,23 +4,21 @@ import com.bezkoder.springjwt.models.Child;
 import com.bezkoder.springjwt.models.Tournament;
 import com.bezkoder.springjwt.models.User;
 import com.bezkoder.springjwt.payload.request.AddChildRequest;
-import com.bezkoder.springjwt.payload.request.LoginRequest;
+
 import com.bezkoder.springjwt.payload.response.MessageResponse;
 import com.bezkoder.springjwt.repository.UserRepository;
 import com.bezkoder.springjwt.security.services.UserDetailsImpl;
 import com.bezkoder.springjwt.service.ChildService;
 import com.bezkoder.springjwt.service.TournamentService;
-import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -82,17 +80,23 @@ public class UserController {
 
     @GetMapping("/tournaments")
     @ResponseBody
-    public List<Tournament> fetchTounrnaments(){
-        long id=2;
+    public ResponseEntity<?> fetchTounrnaments(@RequestParam Long id){
         Child child=childService.fetchChild(id);
         String dobString=child.getDob();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate dob = LocalDate.parse(dobString, formatter);
-
         int age = calculateAge(dob, LocalDate.now());
         int ageIncrement=age+1;
-        List<Tournament> tournaments=tournamentService.fetchTournament(ageIncrement+"");
-        return tournaments;
+        try {
+            List<Tournament> tournaments=tournamentService.fetchTournament(ageIncrement+"");
+            if (tournaments != null) {
+                return ResponseEntity.ok(tournaments);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tournament not found");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch tournament");
+        }
     }
 
     private int calculateAge(LocalDate dob, LocalDate currentDate) {

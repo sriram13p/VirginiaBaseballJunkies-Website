@@ -15,6 +15,40 @@ html,body,h1,h2,h3,h4,h5 {font-family: "RobotoDraft", "Roboto", sans-serif;}
         }
 
 </style>
+ <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 50px auto;
+        }
+        .schedule-card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+
+        }
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .schedule-header div {
+            display: flex;
+            align-items: center;
+        }
+        .schedule-header img {
+            border-radius: 50%;
+            margin-left: 5px;
+        }
+
+
+    </style>
 <body>
 
 <!-- Side Navigation -->
@@ -41,9 +75,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "RobotoDraft", "Roboto", sans-serif;}
     </div>
     <div class="w3-panel">
       <form id="childForm" method="post" action="/addChild">
-                 <div class="error-message" id="error-message-child">
-
-                  </div>
+                 <div class="error-message" id="error-message-child"></div>
 
             <label for="cname">Child Name</label>
             <input class="w3-input w3-border w3-margin-bottom" type="text" id="cname" name="cname" required>
@@ -89,7 +121,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "RobotoDraft", "Roboto", sans-serif;}
 <!-- Page content -->
 <div class="w3-main" id="main" style="margin-left:320px;">
 <i class="fa fa-bars w3-button w3-white w3-hide-large w3-xlarge w3-margin-top" onclick="w3_open()"></i>
-<a href="javascript:void(0)" class="w3-red w3-button w3-right w3-margin-top w3-margin-right" onclick="document.getElementById('id01').style.display='block'">ADD CHILD</i></a>
+<a href="javascript:void(0)" class="w3-red w3-button w3-round-xxlarge w3-right w3-margin-top w3-margin-right" onclick="document.getElementById('id01').style.display='block'">+ Add Child</i></a>
 
 
 <div id="announcement" class="w3-container person">
@@ -97,12 +129,27 @@ html,body,h1,h2,h3,h4,h5 {font-family: "RobotoDraft", "Roboto", sans-serif;}
 </div>
 
 <div id="tournament" class="w3-container person">
-  <h2>Netflix-like Carousel</h2>
-      
-</div>
+<br>
+
+    <div class="w3-bar">
+        <button class="w3-bar-item w3-button w3-round-xxlarge tablink w3-red" onclick="openTab(event, 'Available')">Available</button>
+        <button class="w3-bar-item w3-button w3-round-xxlarge tablink" onclick="openTab(event, 'Pending')">Registered</button>
+    </div>
+    <div id="Available" class="w3-container tab" style="display:block">
+        <br>
+        <div class="error-message" id="error-message-available"></div>
+        <div id="availableContent"></div>
+    </div>
+
+    <div id="Registered" class="w3-container tab" style="display:none">
+            <h2>Registered</h2>
+    </div>
 
 </div>
 
+</div>
+
+</div>
 <script>
 
 function onloadFunction() {
@@ -119,7 +166,7 @@ function populateDiv() {
 
      // Clear existing content if needed
       demoContainer.innerHTML = '';
-        console.log(${children}.length===0);
+
       if(${children}.length===0){
             var aTag = document.createElement('a');
                         aTag.href = 'javascript:void(0)';
@@ -130,9 +177,6 @@ function populateDiv() {
 
                         var div1 = document.createElement('div');
                         div1.className = 'w3-container';
-
-
-
 
                         aTag.appendChild(div1);
                         demoContainer.appendChild(aTag);
@@ -153,50 +197,47 @@ function populateDiv() {
 
       }
       else{
-          // Loop through response data and create elements
-         ${children}.forEach(function(item, index) {
-             // Create <a> tag for DemoContainer
-             var aTag = document.createElement('a');
-             aTag.href = 'javascript:void(0)';
-             aTag.className = 'w3-bar-item w3-button w3-border-bottom test w3-hover-light-grey';
-             aTag.setAttribute('onclick', "myFunc('Demo" + (index + 2) + "');");
-             aTag.id = (index === 0) ? 'firstTab' : item.id + 'Tab'; // Assign id=firstTab to the first element
+                // Loop through response data and create elements
+                ${children}.forEach(function(item, index) {
+                  // Create <a> tag for DemoContainer
+                  var aTag = document.createElement('a');
+                  aTag.href = 'javascript:void(0)';
+                  aTag.className = 'w3-bar-item w3-button w3-border-bottom test w3-hover-light-grey';
+                  aTag.textContent = item.cname;
+                  aTag.setAttribute('onclick', "tournament('" + item.id + "'); w3_close();");
+                  aTag.id = (index === 0) ? 'firstTab' : item.id + 'Tab'; // Assign id=firstTab to the first element
 
-             var iTagUser = document.createElement('i');
-             iTagUser.className = 'fa fa-user w3-margin-right';
+                  var div1 = document.createElement('div');
+                  div1.className = 'w3-container';
 
-             var span = document.createElement('span');
-             span.className = 'w3-large';
-             span.textContent = item.cname;
 
-             var iTagCaret = document.createElement('i');
-             iTagCaret.className = 'w3-margin-left fa fa-caret-down';
 
-             aTag.appendChild(iTagUser);
-             aTag.appendChild(span);
-             aTag.appendChild(iTagCaret);
+                  var span = document.createElement('span');
+                  span.className = 'w3-opacity w3-large ';
+                  span.textContent = item.name;
 
-             demoContainer.appendChild(aTag);
+                  div1.appendChild(span);
+                  aTag.appendChild(div1);
+                  demoContainer.appendChild(aTag);
 
-             var divContainer = document.createElement('div');
-             divContainer.id = 'Demo' + (index + 2);
-             divContainer.className = 'w3-hide w3-animate-left';
+                  // Create <div> tag for MainContainer
+                  var div2 = document.createElement('div');
+                  div2.id = item.id;
+                  div2.className = 'w3-container person';
 
-             var subATag = document.createElement('a');
-             subATag.href = '#';
-             subATag.className = 'w3-bar-item w3-button';
-             subATag.style.paddingLeft = '45px';
-             subATag.setAttribute('onclick', 'w3_close(); tournament('+item.id+');');
-             subATag.textContent = 'Tournaments';
+                  var h5 = document.createElement('h5');
+                  h5.className = 'w3-opacity';
+                  h5.textContent = item.cname;
 
-             divContainer.appendChild(subATag);
+                  div2.appendChild(h5);
+                  mainContainer.appendChild(div2);
 
-             demoContainer.appendChild(divContainer);
-         });
 
-        var openTab = document.getElementById("firstTab");
-        openTab.click();
-    }
+
+              });
+              var openTab = document.getElementById("firstTab");
+                          openTab.click();
+          }
 
   }
 
@@ -392,16 +433,95 @@ function tournament(id) {
   }
   document.getElementById("tournament").style.display = "block";
   event.currentTarget.className += " w3-light-grey";
+  const availableDiv = $('#availableContent');
+  availableDiv.empty();
   fetchTounrnament(id);
 
 }
 
 function fetchTounrnament(id){
 
+   $('#error-message-available').text("");
+        $.ajax({
+            type: 'GET',
+            url: '/tournaments?id=' + id, // Append id to the URL
+            contentType: 'application/json',
+            success: function(response,textStatus, jqXHR) {
 
+                if (jqXHR.status === 200) {
+
+                    if(response.length===0){
+                        $('#error-message-available').text('No Tournaments Available');
+                    }
+                    else{
+                         generateTournamentCards(response);
+                    }
+
+                } else {
+                    $('#error-message-available').text('Unexpected response format');
+
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                $('#error-message-available').text('Failed to Load Data. Please try again later.');
+
+            }
+        });
+}
+function convertIsoToDateString(isoString) {
+    var date = new Date(isoString);
+
+    // Extract the year, month, and day
+    var year = date.getFullYear();
+    var month = ('0' + (date.getMonth() + 1)).slice(-2); // Months are zero-based
+    var day = ('0' + date.getDate()).slice(-2);
+
+    // Format as "YYYY-MM-DD"
+    return year + '-' + month + '-' + day;
+}
+
+function generateTournamentCards(tournaments) {
+    const availableDiv = $('#availableContent');
+    availableDiv.empty();
+    tournaments.forEach(function(tournament) {
+        var startDate = convertIsoToDateString(tournament.startDate);
+        var endDate = convertIsoToDateString(tournament.endDate);
+
+        var cardHtml =
+            '<div class="w3-card-4 schedule-card">' +
+                '<div class="schedule-header">' +
+                    '<div><span>' + tournament.tname + '</span></div>' +
+                    '<div>' +
+                        '<button class="w3-button w3-red w3-border w3-border-gray w3-round-large" onclick="registerTournament(' + tournament.id + ')">REGISTER</button>' +
+                    '</div>' +
+                '</div>' +
+                '<div><i class="fa fa-calendar"></i><span class="w3-opacity"> ' + startDate + ' to ' + endDate + '</span></div>' +
+                '<div><span class="w3-opacity">' + tournament.league + '</span></div>' +
+                '<div><span class="w3-opacity">' + tournament.organizer + '</span></div>' +
+                '<i class="fa fa-map-marker"></i><span class="w3-opacity"> ' + tournament.location + '</span>' +
+            '</div>';
+        availableDiv.append(cardHtml);
+    });
 }
 
 
+</script>
+<script>
+    function openTab(evt, tabName) {
+        var i, x, tablinks;
+        x = document.getElementsByClassName("tab");
+        for (i = 0; i < x.length; i++) {
+            x[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablink");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+            tablinks[i].className = tablinks[i].className.replace(" w3-animate-zoom", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " w3-red w3-animate-zoom";
+    }
 </script>
 
 

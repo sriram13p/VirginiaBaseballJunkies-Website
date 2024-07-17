@@ -177,7 +177,6 @@ function onloadFunction() {
        type: 'GET',
        url: '/tournament', // Replace with your actual API endpoint
        success: function(response, textStatus, jqXHR) {
-         console.log('AJAX success:', response);
          if (jqXHR.status === 200) {
            const tableBody = document.querySelector("#tournament-data-table tbody");
            tableBody.innerHTML = ''; // Clear existing rows
