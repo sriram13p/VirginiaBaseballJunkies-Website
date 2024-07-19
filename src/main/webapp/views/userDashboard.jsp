@@ -132,8 +132,8 @@ html,body,h1,h2,h3,h4,h5 {font-family: "RobotoDraft", "Roboto", sans-serif;}
 <br>
 
     <div class="w3-bar">
-        <button class="w3-bar-item w3-button w3-round-xxlarge tablink w3-red" onclick="openTab(event, 'Available')">Available</button>
-        <button class="w3-bar-item w3-button w3-round-xxlarge tablink" onclick="openTab(event, 'Pending')">Registered</button>
+         <button id="btnAvailable" class="w3-bar-item w3-button w3-round-xxlarge tablink w3-red">Available</button>
+         <button id="btnRegistered" class="w3-bar-item w3-button w3-round-xxlarge tablink">Registered</button>
     </div>
     <div id="Available" class="w3-container tab" style="display:block">
         <br>
@@ -391,6 +391,7 @@ function w3_close() {
 }
 
 function myFunc(id) {
+
   var x = document.getElementById(id);
   var previousElement = x.previousElementSibling;
 
@@ -454,7 +455,7 @@ function fetchTounrnament(id){
                         $('#error-message-available').text('No Tournaments Available');
                     }
                     else{
-                         generateTournamentCards(response);
+                         generateTournamentCards(response,id);
                     }
 
                 } else {
@@ -481,7 +482,7 @@ function convertIsoToDateString(isoString) {
     return year + '-' + month + '-' + day;
 }
 
-function generateTournamentCards(tournaments) {
+function generateTournamentCards(tournaments, id) {
     const availableDiv = $('#availableContent');
     availableDiv.empty();
     tournaments.forEach(function(tournament) {
@@ -489,39 +490,99 @@ function generateTournamentCards(tournaments) {
         var endDate = convertIsoToDateString(tournament.endDate);
 
         var cardHtml =
-            '<div class="w3-card-4 schedule-card">' +
+            '<div class="w3-card-4 schedule-card" id="card-' + tournament.id + '">' +
                 '<div class="schedule-header">' +
                     '<div><span>' + tournament.tname + '</span></div>' +
                     '<div>' +
-                        '<button class="w3-button w3-red w3-border w3-border-gray w3-round-large" onclick="registerTournament(' + tournament.id + ')">REGISTER</button>' +
+                        '<button class="w3-button w3-red w3-border w3-border-gray w3-round-large" id="register-btn-' + tournament.id + '" onclick="registerTournament(' + tournament.id + ',' + id + ')">REGISTER</button>' +
                     '</div>' +
                 '</div>' +
                 '<div><i class="fa fa-calendar"></i><span class="w3-opacity"> ' + startDate + ' to ' + endDate + '</span></div>' +
                 '<div><span class="w3-opacity">' + tournament.league + '</span></div>' +
                 '<div><span class="w3-opacity">' + tournament.organizer + '</span></div>' +
-                '<i class="fa fa-map-marker"></i><span class="w3-opacity"> ' + tournament.location + '</span>' +
-            '</div>';
+                '<div><i class="fa fa-map-marker"></i><span class="w3-opacity"> ' + tournament.location + '</span></div>' +
+                '<div>' +
+                    '<input type="checkbox" id="checkbox-' + tournament.id + '"> Willing to play up one age group if available' +
+                '</div>' +
+            '</div><br>';
         availableDiv.append(cardHtml);
     });
+}
+
+function registerTournament(tournamentId,id) {
+    var checkbox = $('#checkbox-' + tournamentId);
+    var willingToPlayUp = checkbox.is(':checked');
+
+    var tournamentData = {
+            tid: tournamentId,
+            willingToPlayUp: willingToPlayUp,
+            cid: id
+        };
+    // Disable the register button
+    $('#register-btn-' + tournamentId).prop('disabled', true);
+
+    $('#error-message-available').text("");
+    $.ajax({
+            url: '/registration', // Change this URL to your actual endpoint
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(tournamentData),
+            success: function(response) {
+                if(response.message && response){
+                    $('#card-' + tournamentId).remove();
+
+                }else{
+                     $('#error-message-available').text(response.message);
+                     $('#register-btn-' + tournamentId).prop('disabled', false);
+                }
+
+            },
+            error: function(error) {
+                 $('#error-message-available').text(error.responseJSON.message);
+                 $('#register-btn-' + tournamentId).prop('disabled', false);
+            }
+        });
+
 }
 
 
 </script>
 <script>
-    function openTab(evt, tabName) {
-        var i, x, tablinks;
-        x = document.getElementsByClassName("tab");
-        for (i = 0; i < x.length; i++) {
-            x[i].style.display = "none";
-        }
-        tablinks = document.getElementsByClassName("tablink");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
-            tablinks[i].className = tablinks[i].className.replace(" w3-animate-zoom", "");
-        }
-        document.getElementById(tabName).style.display = "block";
-        evt.currentTarget.className += " w3-red w3-animate-zoom";
+ document.getElementById('btnAvailable').addEventListener('click', function() {
+        openTab('Available', this);
+    });
+    document.getElementById('btnAvailable').addEventListener('touchstart', function() {
+        openTab('Available', this);
+    });
+
+    document.getElementById('btnRegistered').addEventListener('click', function() {
+        openTab('Registered', this);
+    });
+    document.getElementById('btnRegistered').addEventListener('touchstart', function() {
+        openTab('Registered', this);
+    });
+
+function openTab(tabName, element) {
+    var i, x, tablinks;
+
+
+    // Hide all elements with class "tab"
+    x = document.getElementsByClassName("tab");
+    for (i = 0; i < x.length; i++) {
+        x[i].style.display = "none";
     }
+
+    // Remove the "w3-red" class from all elements with class "tablink"
+    tablinks = document.getElementsByClassName("tablink");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].classList.remove("w3-red","w3-animate-zoom");
+    }
+
+    // Show the current tab, and add an "w3-red" class to the button that opened the tab
+    document.getElementById(tabName).style.display = "block";
+    element.classList.add("w3-red");
+    element.classList.add("w3-animate-zoom");
+}
 </script>
 
 

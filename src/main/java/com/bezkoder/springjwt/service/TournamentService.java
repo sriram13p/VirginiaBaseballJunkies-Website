@@ -25,8 +25,8 @@ public class TournamentService {
         return tournamentRepo.findAll();
     }
 
-    public List<Tournament> fetchTournament(String s) {
-        List<Tournament> tournaments= tournamentRepo.findByEndDateAfterAndAgeAllowedContaining(s);
+    public List<Tournament> fetchTournament(String s, Long id) {
+        List<Tournament> tournaments= tournamentRepo.findByEndDateAfterAndAgeAllowedContainingAndChildNotRegistered(s,id);
         return tournaments;
     }
 }
