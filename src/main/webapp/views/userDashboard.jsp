@@ -142,7 +142,9 @@ html,body,h1,h2,h3,h4,h5 {font-family: "RobotoDraft", "Roboto", sans-serif;}
     </div>
 
     <div id="Registered" class="w3-container tab" style="display:none">
-            <h2>Registered</h2>
+        <br>
+        <div class="error-message" id="error-message-registered"></div>
+        <div id="registeredContent"></div>
     </div>
 
 </div>
@@ -151,7 +153,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "RobotoDraft", "Roboto", sans-serif;}
 
 </div>
 <script>
-
+let childIDHolder;
 function onloadFunction() {
   const tableBody = document.querySelector("#tournament-data-table tbody");
     populateDiv();
@@ -434,8 +436,16 @@ function tournament(id) {
   }
   document.getElementById("tournament").style.display = "block";
   event.currentTarget.className += " w3-light-grey";
+
+  document.getElementById('btnAvailable').click();
+
   const availableDiv = $('#availableContent');
   availableDiv.empty();
+
+  const registeredDiv = $('#registeredContent');
+  registeredDiv.empty();
+
+  childIDHolder=id;
   fetchTounrnament(id);
 
 }
@@ -557,9 +567,11 @@ function registerTournament(tournamentId,id) {
 
     document.getElementById('btnRegistered').addEventListener('click', function() {
         openTab('Registered', this);
+        fetchRegistration();
     });
     document.getElementById('btnRegistered').addEventListener('touchstart', function() {
         openTab('Registered', this);
+        fetchRegistration();
     });
 
 function openTab(tabName, element) {
@@ -582,6 +594,65 @@ function openTab(tabName, element) {
     document.getElementById(tabName).style.display = "block";
     element.classList.add("w3-red");
     element.classList.add("w3-animate-zoom");
+}
+
+function fetchRegistration(){
+ $('#error-message-registered').text("");
+        $.ajax({
+            type: 'GET',
+            url: '/registrations?id=' + childIDHolder, // Append id to the URL
+            contentType: 'application/json',
+            success: function(response,textStatus, jqXHR) {
+
+                if (jqXHR.status === 200) {
+
+                    if(response.length===0){
+                        $('#error-message-registered').text('No Registrations Available');
+                    }
+                    else{
+                         generateRegistrationCards(response,childIDHolder);
+                    }
+
+                } else {
+                    $('#error-message-registered').text('Unexpected response format');
+
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                $('#error-message-registered').text('Failed to Load Data. Please try again later.');
+
+            }
+        });
+}
+
+function generateRegistrationCards(tournaments, id){
+const availableDiv = $('#registeredContent');
+    availableDiv.empty();
+    tournaments.forEach(function(tournament) {
+        var startDate = convertIsoToDateString(tournament.tournament.startDate);
+        var endDate = convertIsoToDateString(tournament.tournament.endDate);
+
+        var checkboxChecked = tournament.willingToPlayUp ? 'checked' : '';
+        var cardHtml =
+            '<div class="w3-card-4 schedule-card" id="card-' + tournament.id + '">' +
+                '<div class="schedule-header">' +
+                    '<div><span>' + tournament.tournament.tname + '</span></div>' +
+                    '<div>' +
+                        '<button class="w3-button w3-red w3-border w3-border-gray w3-round-large" id="edit-btn-' + tournament.id + '" onclick="editTournament(' + tournament.id + ')">EDIT</button>' +
+                    '</div>' +
+                '</div>' +
+                '<div><i class="fa fa-calendar"></i><span class="w3-opacity"> ' + startDate + ' to ' + endDate + '</span></div>' +
+                '<div><span class="w3-opacity">' + tournament.tournament.league + '</span></div>' +
+                '<div><span class="w3-opacity">' + tournament.tournament.organizer + '</span></div>' +
+                '<div><i class="fa fa-map-marker"></i><span class="w3-opacity"> ' + tournament.tournament.location + '</span></div>' +
+                '<div>' +
+                    '<input type="checkbox" id="checkbox-' + tournament.id + '" ' + checkboxChecked + ' disabled> Willing to play up one age group if available' +
+                '</div>' +
+            '</div><br>';
+        availableDiv.append(cardHtml);
+    });
+
 }
 </script>
 

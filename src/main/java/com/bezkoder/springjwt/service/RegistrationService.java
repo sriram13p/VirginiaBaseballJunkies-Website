@@ -1,9 +1,12 @@
 package com.bezkoder.springjwt.service;
 
 import com.bezkoder.springjwt.models.Registration;
+import com.bezkoder.springjwt.models.Tournament;
 import com.bezkoder.springjwt.repository.RegistrationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class RegistrationService {
@@ -21,5 +24,11 @@ public class RegistrationService {
         }catch(Exception e){
             return "Error Occured while saving, Try Again Later";
         }
+    }
+
+    public List<Registration> fetchRegisterationByChild(Long id) {
+        List<Registration> registrations = registrationRepository.findByChildId(id);
+        registrations.forEach(registration -> registration.setChild(null));
+        return registrations;
     }
 }

@@ -133,6 +133,22 @@ public class UserController {
 
     }
 
+    @GetMapping("/registrations")
+    @ResponseBody
+    public ResponseEntity<?> fetchRegistrations(@RequestParam Long id){
+        try {
+            List<Registration> registrations=registrationService.fetchRegisterationByChild(id);
+
+            if (registrations != null) {
+                return ResponseEntity.ok(registrations);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Registrations not found");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch Registrations");
+        }
+    }
+
     private int calculateAge(LocalDate dob, LocalDate currentDate) {
         if ((dob != null) && (currentDate != null)) {
             return Period.between(dob, currentDate).getYears();
