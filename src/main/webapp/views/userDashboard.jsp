@@ -656,7 +656,5 @@ const availableDiv = $('#registeredContent');
 }
 </script>
 
-
-
 </body>
 </html>

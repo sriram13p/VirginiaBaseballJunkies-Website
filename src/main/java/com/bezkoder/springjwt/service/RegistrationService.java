@@ -31,4 +31,8 @@ public class RegistrationService {
         registrations.forEach(registration -> registration.setChild(null));
         return registrations;
     }
+
+    public List<Registration> fetchRegisterationsByTournament(Long id) {
+        return registrationRepository.findByTournamentId(id);
+    }
 }

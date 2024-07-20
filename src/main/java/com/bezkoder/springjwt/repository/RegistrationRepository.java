@@ -10,4 +10,6 @@ import java.util.List;
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
 
     List<Registration> findByChildId(Long id);
+
+    List<Registration> findByTournamentId(Long id);
 }

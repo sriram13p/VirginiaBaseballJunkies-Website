@@ -8,6 +8,7 @@
     <link href='https://fonts.googleapis.com/css?family=RobotoDraft' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         html,body,h1,h2,h3,h4,h5 {font-family: "RobotoDraft", "Roboto", sans-serif;}
         .w3-bar-block .w3-bar-item{padding:16px}
@@ -16,30 +17,39 @@
         }
     </style>
     <style>
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-        }
-        .dropdown-content input {
-            box-sizing: border-box;
-            width: 100%;
-            padding: 12px;
-            border: none;
-        }
-        .dropdown-content div {
-            padding: 12px;
-            cursor: pointer;
-        }
-        .dropdown-content div:hover {
-            background-color: #ddd;
-        }
-        .show {display: block;}
-    </style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f5f5f5;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                width: 80%;
+                margin: 50px auto;
+            }
+            .schedule-card {
+                background-color: #fff;
+                border-radius: 10px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                padding: 20px;
 
+            }
+            .schedule-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .schedule-header div {
+                display: flex;
+                align-items: center;
+            }
+            .schedule-header img {
+                border-radius: 50%;
+                margin-left: 5px;
+            }
+
+
+        </style>
 </head>
 <body>
 
@@ -86,7 +96,7 @@
       <input class="w3-input w3-border w3-margin-bottom" type="text" id="organizer" name="organizer" required>
       <div id="organizerError" class="error-message"></div>
 
-      <label for="ageAllowed">Organizer</label>
+      <label for="ageAllowed">Age Allowed</label>
       <select id="ageAllowed" name="ageAllowed" multiple class="w3-select w3-border" required>
                   <option value="9U">9U</option>
                   <option value="10U">10U</option>
@@ -140,10 +150,9 @@
       <div id="gameDateError" class="error-message"></div>
 
       <label for="gtname">Tournament</label>
-      <input class="w3-input w3-border w3-margin-bottom" type="text" id="dropdownInput" placeholder="Select a tournament" onfocus="toggleDropdown()" required>
-      <div id="dropdownContent" class="dropdown-content">
-      <input type="text" id="searchInput" placeholder="Search..." onkeyup="filterDropdown()"></div>
-      <input type="hidden" id="selectedTournamentId" required>
+      <select id="gtname" class="w3-select w3-border">
+      <option value="">None</option>
+      </select>
       <div id="gtnameError" class="error-message"></div>
 
       <div class="w3-margin-top"></div>
@@ -197,13 +206,122 @@
           <strong>Games</strong>
         </p>
         <p class="w3-right">
-          <i class="fa fa-plus" onclick="document.getElementById('id02').style.display='block'"></i>
+          <i class="fa fa-plus" onclick="document.getElementById('id02').style.display='block';clearForm();"></i>
         </p>
       </header>
+
+     <div class="w3-container">
+     <select id="gtnamepage" class="w3-select w3-border" onchange="handleTournamentChange()">
+             <option value="">Select a Tournament</option> <!-- Default option -->
+             <!-- Options will be populated dynamically -->
+         </select>
+     </div>
+
+     <div class="error-message" id="error-message-game-page"><strong></strong></div>
+     <br>
+
+     <div class="w3-container" id="gameContent">
+     </div>
+
+</div>
+
+<div id="gameContentView" class="w3-container person">
+ <header class="w3-container w3-xlarge">
+        <p class="w3-left">
+          <i class="fa fa-bars w3-hide-large w3-margin-right w3-xlarge" onclick="w3_open()"></i>
+          <strong id="gameValue"></strong>
+        </p>
+ </header>
+<div class="w3-bar">
+         <button id="btnAvailable" class="w3-bar-item w3-button w3-round-xxlarge tablink">Available</button>
+         <button id="btnRegistered" class="w3-bar-item w3-button w3-round-xxlarge tablink">Registered</button>
+    </div>
+    <div id="Available" class="w3-container tab" style="display:block">
+        <br>
+        <div class="error-message" id="error-message-available"></div>
+        <div id="availableContent"></div>
+    </div>
+    <div id="Registered" class="w3-container tab" style="display:none">
+            <br>
+            <div class="error-message" id="error-message-registered"></div>
+            <div id="registeredContent"></div>
+    </div>
 </div>
 
 <script>
+function handleTournamentChange() {
+    var selectElement = document.getElementById('gtnamepage');
+    var selectedValue = selectElement.value;
+    const gameContentDiv = $('#gameContent');
+    gameContentDiv.empty();
+    document.getElementById('gameContentView').style.display = 'none';
+    $('#error-message-game-page').text("");
+            $.ajax({
+                type: 'GET',
+                url: '/game?id=' + selectedValue, // Append id to the URL
+                contentType: 'application/json',
+                success: function(response,textStatus, jqXHR) {
+
+                    if (jqXHR.status === 200) {
+
+                        if(response.length===0){
+                            $('#error-message-game-page').text('No Games Available');
+                        }
+                        else{
+                             generateGameCards(response);
+                        }
+
+                    } else {
+                        $('#error-message-game-page').text('Unexpected response format');
+
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    $('#error-message-game-page').text('Failed to Load Data. Please try again later.');
+
+                }
+            });
+}
+
+function generateGameCards(games) {
+    const gameContentDiv = $('#gameContent');
+    gameContentDiv.empty();
+    games.forEach(function(game) {
+        var gameDate = convertIsoToDateString(game.gameDate);
+
+        var cardHtml =
+            '<div class="w3-card-4 schedule-card" id="card-' + game.id + '">' +
+                '<div class="schedule-header">' +
+                    '<div><span>' + game.gname + '</span></div>' +
+                    '<div>' +
+                        '<i class="fa fa-eye" id="game-btn-' + game.id + '" onclick="loadGameContent(' + game.id + ', \'' + game.gname + '\')"></i>' +
+                    '</div>' +
+                '</div>' +
+                '<div><i class="fa fa-calendar"></i><span class="w3-opacity"> ' + gameDate + '</span></div>' +
+                '<div><i class="fa fa-map-marker"></i><span class="w3-opacity"> ' + game.location + '</span></div>' +
+            '</div><br>';
+        gameContentDiv.append(cardHtml);
+    });
+}
+
+function loadGameContent(id,name){
+    document.getElementById('gameValue').innerHTML = "# "+id+" - "+name;
+
+    document.getElementById('btnAvailable').click();
+
+      const availableDiv = $('#availableContent');
+      availableDiv.empty();
+
+      const registeredDiv = $('#registeredContent');
+      registeredDiv.empty();
+    openMail('gameContentView');
+    document.getElementById('btnAvailable').click();
+
+}
+
 function onloadFunction() {
+  document.getElementById('gameContentView').style.display = 'none';
   const tableBody = document.querySelector("#tournament-data-table tbody");
 
   $.ajax({
@@ -255,7 +373,6 @@ function onloadFunction() {
            });
            populateDropdown(response);
          } else {
-           console.log('AJAX error status:', jqXHR.status);
            $('#error-message-tournament-container').text('Try Again');
          }
        },
@@ -301,7 +418,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var gameNameInput = document.getElementById("gname");
     var glocationInput = document.getElementById("glocation");
     var gameDateInput = document.getElementById("gameDate");
-    var gtInput = document.getElementById("selectedTournamentId");
+    var gtInput = document.getElementById("gtname");
 
 
     function validateGameForm(){
@@ -529,8 +646,8 @@ function clearForm() {
     document.getElementById("gname").value = "";
     document.getElementById("glocation").value = "";
     document.getElementById("gameDate").value = "";
-    document.getElementById("dropdownInput").value = "";
-    document.getElementById("searchInput").value = "";
+    document.getElementById("gtname").value = "";
+
 
     // Clear error messages
     document.getElementById("tnameError").textContent = "";
@@ -594,50 +711,55 @@ openTab.click();
     <script>
 
         function populateDropdown(tournaments) {
-            const dropdownContent = document.getElementById('dropdownContent');
             tournaments.forEach(tournament => {
-                const div = document.createElement('div');
-                div.textContent = "#"+tournament.id+"-"+tournament.tname;
-                div.setAttribute('data-id', tournament.id);
-                div.addEventListener('click', () => {
-                    // Update the input field and hidden input field
-                    document.getElementById('dropdownInput').value = tournament.tname;
-                    document.getElementById('selectedTournamentId').value = tournament.id;
-                    document.getElementById("gtnameError").textContent = "";
-                    // Hide the dropdown
-                    document.getElementById('dropdownContent').classList.remove('show');
-                });
-                dropdownContent.appendChild(div);
-            });
+                        $('#gtname').append(new Option("#"+tournament.id+"-"+tournament.tname, tournament.id));
+                    });
+            tournaments.forEach(tournament => {
+                                    $('#gtnamepage').append(new Option("#"+tournament.id+"-"+tournament.tname, tournament.id));
+                                });
+
+
         }
 
-        function filterDropdown() {
-            const input = document.getElementById('searchInput');
-            const filter = input.value.toLowerCase();
-            const items = document.getElementById('dropdownContent').getElementsByTagName('div');
+    </script>
+    <script>
+     document.getElementById('btnAvailable').addEventListener('click', function() {
+            openTab('Available', this);
+        });
+        document.getElementById('btnAvailable').addEventListener('touchstart', function() {
+            openTab('Available', this);
+        });
 
-            Array.from(items).forEach(item => {
-                const text = item.textContent || item.innerText;
-                item.style.display = text.toLowerCase().includes(filter) ? '' : 'none';
-            });
+        document.getElementById('btnRegistered').addEventListener('click', function() {
+            openTab('Registered', this);
+            fetchRegistration();
+        });
+        document.getElementById('btnRegistered').addEventListener('touchstart', function() {
+            openTab('Registered', this);
+            fetchRegistration();
+        });
+
+    function openTab(tabName, element) {
+        var i, x, tablinks;
+
+
+        // Hide all elements with class "tab"
+        x = document.getElementsByClassName("tab");
+        for (i = 0; i < x.length; i++) {
+            x[i].style.display = "none";
         }
 
-        function toggleDropdown() {
-            document.getElementById('dropdownContent').classList.toggle('show');
+        // Remove the "w3-red" class from all elements with class "tablink"
+        tablinks = document.getElementsByClassName("tablink");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("w3-red","w3-animate-zoom");
         }
 
-
-        // Close the dropdown if the user clicks outside of it
-        window.onclick = function(event) {
-            if (!event.target.matches('#dropdownInput')) {
-                const dropdowns = document.getElementsByClassName("dropdown-content");
-                Array.from(dropdowns).forEach(dropdown => {
-                    if (dropdown.classList.contains('show')) {
-                        dropdown.classList.remove('show');
-                    }
-                });
-            }
-        }
+        // Show the current tab, and add an "w3-red" class to the button that opened the tab
+        document.getElementById(tabName).style.display = "block";
+        element.classList.add("w3-red");
+        element.classList.add("w3-animate-zoom");
+    }
     </script>
 
 </body>
