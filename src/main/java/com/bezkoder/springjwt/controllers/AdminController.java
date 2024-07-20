@@ -1,8 +1,12 @@
 package com.bezkoder.springjwt.controllers;
 
+import com.bezkoder.springjwt.models.Game;
 import com.bezkoder.springjwt.models.Tournament;
+import com.bezkoder.springjwt.payload.request.AddGame;
 import com.bezkoder.springjwt.payload.request.AddTournament;
 import com.bezkoder.springjwt.payload.response.MessageResponse;
+import com.bezkoder.springjwt.repository.TournamentRepo;
+import com.bezkoder.springjwt.service.GameService;
 import com.bezkoder.springjwt.service.TournamentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +30,12 @@ public class AdminController {
     @Autowired
     private TournamentService tournamentService;
 
+    @Autowired
+    private GameService gameService;
+
+    @Autowired
+    private TournamentRepo tournamentRepo;
+
     @PostMapping("/tournament")
     @ResponseBody
     public ResponseEntity<?> addTournament(@RequestBody AddTournament addTournament) throws ParseException {
@@ -46,6 +56,28 @@ public class AdminController {
 
         }
     }
+
+    @PostMapping("/game")
+    @ResponseBody
+    public ResponseEntity<?> addGame(@RequestBody AddGame addGame) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date gameDate= formatter.parse(addGame.getGameDate());
+        Tournament tournament=tournamentRepo.getReferenceById(addGame.getTid());
+        Game game=new Game(addGame.getGname(), addGame.getLocation(), gameDate,tournament);
+
+        String result=gameService.saveGame(game);
+        if (result.equals("success")) {
+            return ResponseEntity.ok(new MessageResponse("Tournament Saved successfully!"));
+        } else {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error Try Again"));
+
+        }
+
+    }
+
+
 
 
     @GetMapping("/tournament")

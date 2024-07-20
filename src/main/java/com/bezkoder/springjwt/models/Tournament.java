@@ -16,6 +16,7 @@ public class Tournament {
 
     @NotBlank
     private String tname;
+
     @NotBlank
     private String location;
 

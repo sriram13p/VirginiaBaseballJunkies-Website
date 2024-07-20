@@ -15,6 +15,31 @@
             color: red;
         }
     </style>
+    <style>
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+        .dropdown-content input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 12px;
+            border: none;
+        }
+        .dropdown-content div {
+            padding: 12px;
+            cursor: pointer;
+        }
+        .dropdown-content div:hover {
+            background-color: #ddd;
+        }
+        .show {display: block;}
+    </style>
+
 </head>
 <body>
 
@@ -24,30 +49,8 @@
   <a href="javascript:void(0)" onclick="w3_close()" title="Close Sidemenu"
   class="w3-bar-item w3-button w3-hide-large w3-large">Close <i class="fa fa-remove"></i></a>
   <a href="javascript:void(0)" class="w3-bar-item w3-button w3-dark-grey w3-button w3-hover-black w3-left-align" onclick="document.getElementById('id01').style.display='block'">Create Tournament<i class="w3-padding fa fa-pencil"></i></a>
-  <a href="javascript:void(0)" class="w3-bar-item w3-button w3-button w3-hover-black w3-left-align" onclick="openMail('tournaments');w3_close();" id="firstTab">Tournaments</a>
-  <a id="myBtn" onclick="myFunc('Demo1')" href="javascript:void(0)" class="w3-bar-item w3-button"><i class="fa fa-inbox w3-margin-right"></i>Inbox (3)<i class="w3-margin-left fa fa-caret-down"></i></a>
-  <div id="Demo1" class="w3-hide w3-animate-left">
-    <a href="javascript:void(0)" class="w3-bar-item w3-button w3-border-bottom test w3-hover-light-grey" onclick="openMail('tournaments');w3_close();" id="firstTab">
-      <div class="w3-container">
-        <img class="w3-round w3-margin-right" src="/w3images/avatar3.png" style="width:15%;"><span class="w3-opacity w3-large">Borge Refsnes</span>
-        <h6>Subject: Remember Me</h6>
-        <p>Hello, i just wanted to let you know that i'll be home at...</p>
-      </div>
-    </a>
-     <a href="javascript:void(0)" class="w3-bar-item w3-button w3-border-bottom test w3-hover-light-grey" onclick="openMail('Jane');w3_close();">
-      <div class="w3-container">
-        <img class="w3-round w3-margin-right" src="/w3images/avatar5.png" style="width:15%;"><span class="w3-opacity w3-large">Jane Doe</span>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
-      </div>
-    </a>
-    <a href="javascript:void(0)" class="w3-bar-item w3-button w3-border-bottom test w3-hover-light-grey" onclick="openMail('John');w3_close();">
-      <div class="w3-container">
-        <img class="w3-round w3-margin-right" src="/w3images/avatar2.png" style="width:15%;"><span class="w3-opacity w3-large">John Doe</span>
-        <p>Welcome!</p>
-      </div>
-    </a>
-  </div>
-  <a href="#" class="w3-bar-item w3-button"><i class="fa fa-paper-plane w3-margin-right"></i>Sent</a>
+  <a href="javascript:void(0)" class="w3-bar-item w3-button" onclick="openMail('tournaments');w3_close();" id="firstTab"><i class="fa fa-trophy w3-margin-right"></i>Tournaments</a>
+  <a href="javascript:void(0)" class="w3-bar-item w3-button" onclick="openMail('game');w3_close();"><i class="fa fa-gamepad w3-margin-right"></i>Games</a>
   <a href="#" class="w3-bar-item w3-button"><i class="fa fa-hourglass-end w3-margin-right"></i>Drafts</a>
   <a href="#" class="w3-bar-item w3-button"><i class="fa fa-trash w3-margin-right"></i>Trash</a>
   <a href="/logout" class="w3-bar-item w3-button"><i class="fa fa-sign-out w3-margin-right"></i>Logout</a>
@@ -58,7 +61,7 @@
 <div id="id01" class="w3-modal" style="z-index:4">
   <div class="w3-modal-content w3-animate-zoom">
     <div class="w3-container w3-padding w3-red">
-       <span onclick="document.getElementById('id01').style.display='none'" class="w3-button w3-right w3-xxlarge"><i class="fa fa-remove"></i></span>
+       <span onclick="document.getElementById('id01').style.display='none';clearForm();" class="w3-button w3-right w3-xxlarge"><i class="fa fa-remove"></i></span>
       <h2>Create Tournament</h2>
     </div>
     <div class="w3-panel">
@@ -105,9 +108,49 @@
 
       <div class="w3-margin-top"></div>
       <div class="w3-section">
-        <a class="w3-button w3-red" onclick="document.getElementById('id01').style.display='none'">Cancel</a>
+        <a class="w3-button w3-red" onclick="document.getElementById('id01').style.display='none';clearForm();">Cancel</a>
         <a class="w3-button w3-red" onclick="clearForm()">Clear</a>
         <button type="submit" id="submitButton" class="w3-button w3-right w3-green">Submit</button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+
+<div id="id02" class="w3-modal" style="z-index:4">
+  <div class="w3-modal-content w3-animate-zoom">
+    <div class="w3-container w3-padding w3-red">
+       <span onclick="document.getElementById('id02').style.display='none';clearForm();" class="w3-button w3-right w3-xxlarge"><i class="fa fa-remove"></i></span>
+      <h2>Create Game</h2>
+    </div>
+    <div class="w3-panel">
+    <form id="gameForm" method="post" action="/game">
+           <div class="error-message" id="error-message-game"></div>
+
+      <label for="gname">Game Name</label>
+      <input class="w3-input w3-border w3-margin-bottom" type="text" id="gname" name="gname" required>
+      <div id="gnameError" class="error-message"></div>
+
+      <label for="glocation">Location</label>
+      <input class="w3-input w3-border w3-margin-bottom" type="text" id="glocation" name="location" required>
+      <div id="glocationError" class="error-message"></div>
+
+      <label for="gameDate">Game Date</label>
+      <input class="w3-input w3-border w3-margin-bottom" type="date" id="gameDate" name="gameDate" required>
+      <div id="gameDateError" class="error-message"></div>
+
+      <label for="gtname">Tournament</label>
+      <input class="w3-input w3-border w3-margin-bottom" type="text" id="dropdownInput" placeholder="Select a tournament" onfocus="toggleDropdown()" required>
+      <div id="dropdownContent" class="dropdown-content">
+      <input type="text" id="searchInput" placeholder="Search..." onkeyup="filterDropdown()"></div>
+      <input type="hidden" id="selectedTournamentId" required>
+      <div id="gtnameError" class="error-message"></div>
+
+      <div class="w3-margin-top"></div>
+      <div class="w3-section">
+        <a class="w3-button w3-red" onclick="document.getElementById('id02').style.display='none';clearForm();">Cancel</a>
+        <a class="w3-button w3-red" onclick="clearForm()">Clear</a>
+        <button type="submit" id="gameSubmitButton" class="w3-button w3-right w3-green">Submit</button>
       </div>
     </form>
     </div>
@@ -119,11 +162,15 @@
 
 <!-- Page content -->
 <div class="w3-main" style="margin-left:320px;">
-<i class="fa fa-bars w3-button w3-white w3-hide-large w3-xlarge w3-margin-top" onclick="w3_open()"></i>
-<a href="javascript:void(0)" class="w3-hide-large w3-red w3-button w3-right w3-margin-top w3-margin-right" onclick="document.getElementById('id01').style.display='block'"><i class="fa fa-pencil"></i></a>
 
-<div id="tournaments" class="w3-container person w3-responsive w3-margin-top">
+<div id="tournaments" class="w3-container person w3-responsive">
 
+<header class="w3-container w3-xlarge">
+    <p class="w3-left">
+    <i class="fa fa-bars w3-hide-large w3-margin-right w3-xlarge" onclick="w3_open()"></i>
+    <strong>Tournaments</strong>
+    </p>
+</header>
     <div class="error-message" id="error-message-tournament-container"> </div>
    <table class="w3-table-all" id="tournament-data-table">
       <thead>
@@ -143,30 +190,16 @@
     </table>
 </div>
 
-<div id="Jane" class="w3-container person">
-  <br>
-  <img class="w3-round w3-animate-top" src="/w3images/avatar5.png" style="width:20%;">
-  <h5 class="w3-opacity">Subject: None</h5>
-  <h4><i class="fa fa-clock-o"></i> From Jane Doe, Sep 25, 2015.</h4>
-  <a class="w3-button">Reply<i class="w3-padding fa fa-mail-reply"></i></a>
-  <a class="w3-button">Forward<i class="w3-padding fa fa-arrow-right"></i></a>
-  <hr>
-  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-  <p>Forever yours,<br>Jane</p>
-</div>
-
-<div id="John" class="w3-container person">
-  <br>
-  <img class="w3-round w3-animate-top" src="/w3images/avatar2.png" style="width:20%;">
-  <h5 class="w3-opacity">Subject: None</h5>
-  <h4><i class="fa fa-clock-o"></i> From John Doe, Sep 23, 2015.</h4>
-  <a class="w3-button">Reply<i class="w3-padding fa fa-mail-reply"></i></a>
-  <a class="w3-button">Forward<i class="w3-padding fa fa-arrow-right"></i></a>
-  <hr>
-  <p>Welcome.</p>
-  <p>That's it!</p>
-</div>
-
+<div id="game" class="w3-container person">
+      <header class="w3-container w3-xlarge">
+        <p class="w3-left">
+          <i class="fa fa-bars w3-hide-large w3-margin-right w3-xlarge" onclick="w3_open()"></i>
+          <strong>Games</strong>
+        </p>
+        <p class="w3-right">
+          <i class="fa fa-plus" onclick="document.getElementById('id02').style.display='block'"></i>
+        </p>
+      </header>
 </div>
 
 <script>
@@ -180,7 +213,7 @@ function onloadFunction() {
          if (jqXHR.status === 200) {
            const tableBody = document.querySelector("#tournament-data-table tbody");
            tableBody.innerHTML = ''; // Clear existing rows
-
+           tournaments=response;
            response.forEach(item => {
              const row = document.createElement('tr');
 
@@ -210,16 +243,17 @@ function onloadFunction() {
                  row.appendChild(ageAllowedCell);
 
                  const startDateCell = document.createElement('td');
-                 startDateCell.textContent = item.startDate;
+                 startDateCell.textContent = convertIsoToDateString(item.startDate);
                  row.appendChild(startDateCell);
 
                  const endDateCell = document.createElement('td');
-                 endDateCell.textContent = item.endDate;
+                 endDateCell.textContent = convertIsoToDateString(item.endDate);
                  row.appendChild(endDateCell);
 
                  // Append the row to the table body
                  tableBody.appendChild(row);
            });
+           populateDropdown(response);
          } else {
            console.log('AJAX error status:', jqXHR.status);
            $('#error-message-tournament-container').text('Try Again');
@@ -229,7 +263,20 @@ function onloadFunction() {
          console.error('AJAX error:', error);
          $('#error-message-tournament-container').text('Try Again Later');
        }
-     });
+  });
+
+}
+
+function convertIsoToDateString(isoString) {
+    var date = new Date(isoString);
+
+    // Extract the year, month, and day
+    var year = date.getFullYear();
+    var month = ('0' + (date.getMonth() + 1)).slice(-2); // Months are zero-based
+    var day = ('0' + date.getDate()).slice(-2);
+
+    // Format as "YYYY-MM-DD"
+    return year + '-' + month + '-' + day;
 }
 
 
@@ -237,6 +284,7 @@ window.onload = onloadFunction;
 
 
 document.addEventListener("DOMContentLoaded", function () {
+
     // Get form and input elements
     var form = document.getElementById("tournamentForm");
     var tournamentNameInput = document.getElementById("tname");
@@ -249,11 +297,56 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var selectedValues;
 
+    var gameform = document.getElementById("gameForm");
+    var gameNameInput = document.getElementById("gname");
+    var glocationInput = document.getElementById("glocation");
+    var gameDateInput = document.getElementById("gameDate");
+    var gtInput = document.getElementById("selectedTournamentId");
+
+
+    function validateGameForm(){
+        var isValid = true;
+
+        // Clear previous error messages
+        document.getElementById("gnameError").textContent = "";
+        document.getElementById("gameDateError").textContent = "";
+        document.getElementById("glocationError").textContent = "";
+        document.getElementById("gtnameError").textContent = "";
+
+        // Validate Game name
+        if (gameNameInput.value.trim() === "") {
+            document.getElementById("gnameError").textContent = "Game name is required.";
+            isValid = false;
+        }
+
+        // Validate Game date
+        var gameDate = new Date(gameDateInput.value);
+        var today = new Date();
+        if (gameDate <= today) {
+            document.getElementById("gameDateError").textContent = "Game date must be in the future.";
+            isValid = false;
+        }
+
+        // Validate location
+        if (glocationInput.value.trim() === "") {
+            document.getElementById("glocationError").textContent = "Location is required.";
+            isValid = false;
+        }
+
+        // Validate Tournament
+        if (gtInput.value.trim() === "") {
+            document.getElementById("gtnameError").textContent = "Tournament is required.";
+            isValid = false;
+        }
+
+        return isValid;
+
+    }
+
+
     // Validate function
     function validateForm() {
         var isValid = true;
-
-
 
         // Clear previous error messages
         document.getElementById("tnameError").textContent = "";
@@ -324,6 +417,58 @@ document.addEventListener("DOMContentLoaded", function () {
     leagueInput.addEventListener("input", validateForm);
     ageAllowedInput.addEventListener("input", validateForm);
 
+
+    gameNameInput.addEventListener("input",validateGameForm);
+    glocationInput.addEventListener("input",validateGameForm);
+    gameDateInput.addEventListener("input",validateGameForm);
+    gtInput.addEventListener("input",validateGameForm);
+
+    gameForm.addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            if (!validateGameForm()) {
+                return; // Exit function early if validation fails
+            }
+
+            // Form data object
+            var formData = {
+                gname: gameNameInput.value,
+                location: glocationInput.value,
+                gameDate: gameDateInput.value,
+                tid: gtInput.value
+            };
+
+            $('#gameSubmitButton').prop('disabled', true);
+
+             $.ajax({
+                                    type: 'POST',
+                                    url: '/game', // Replace with your actual API endpoint
+                                    contentType: 'application/json',
+                                    data: JSON.stringify(formData),
+                                    success: function(response) {
+                                        if (response.message) {
+                                            $('#error-message-game').text(response.message);
+
+                                            setTimeout(function() {
+                                                            clearForm();
+                                                            document.getElementById('id02').style.display = 'none';
+
+                                                            }, 2000);
+                                        }else{
+                                            $('#error-message-game').text('Try Again');
+                                            $('#gameSubmitButton').prop('disabled', false);
+                                        }
+                                    },
+                                    error: function(error) {
+                                        console.error('Error:', error);
+                                        $('#error-message-tournament').text('Try Again Later');
+                                        $('#submitButton').prop('disabled', false);
+                                    }
+                    });
+
+
+        });
+
     // Event listener for form submission
     form.addEventListener("submit", function(event) {
         event.preventDefault(); // Prevent default form submission
@@ -369,9 +514,9 @@ document.addEventListener("DOMContentLoaded", function () {
                             $('#error-message-tournament').text('Try Again Later');
                             $('#submitButton').prop('disabled', false);
                         }
-                    });
-
+        });
     });
+
 });
 
 function clearForm() {
@@ -381,6 +526,12 @@ function clearForm() {
     document.getElementById("startDate").value = "";
     document.getElementById("endDate").value = "";
 
+    document.getElementById("gname").value = "";
+    document.getElementById("glocation").value = "";
+    document.getElementById("gameDate").value = "";
+    document.getElementById("dropdownInput").value = "";
+    document.getElementById("searchInput").value = "";
+
     // Clear error messages
     document.getElementById("tnameError").textContent = "";
     document.getElementById("locationError").textContent = "";
@@ -388,6 +539,14 @@ function clearForm() {
     document.getElementById("startDateError").textContent = "";
     document.getElementById("endDateError").textContent = "";
     document.getElementById("error-message-tournament").textContent = "";
+
+    document.getElementById("gnameError").textContent = "";
+    document.getElementById("gameDateError").textContent = "";
+    document.getElementById("glocationError").textContent = "";
+    document.getElementById("gtnameError").textContent = "";
+
+
+
 
 }
 
@@ -419,17 +578,67 @@ function openMail(personName) {
     for (i = 0; i < x.length; i++) {
         x[i].style.display = "none";
     }
-    x = document.getElementsByClassName("test");
+    x = document.getElementsByClassName("w3-bar-item");
     for (i = 0; i < x.length; i++) {
-        x[i].className = x[i].className.replace(" w3-light-grey", "");
+        x[i].classList.remove("w3-red");
     }
     document.getElementById(personName).style.display = "block";
-    event.currentTarget.className += " w3-light-grey";
+    event.currentTarget.classList.add("w3-red");
 }
 
 var openTab = document.getElementById("firstTab");
 openTab.click();
+
+
 </script>
+    <script>
+
+        function populateDropdown(tournaments) {
+            const dropdownContent = document.getElementById('dropdownContent');
+            tournaments.forEach(tournament => {
+                const div = document.createElement('div');
+                div.textContent = "#"+tournament.id+"-"+tournament.tname;
+                div.setAttribute('data-id', tournament.id);
+                div.addEventListener('click', () => {
+                    // Update the input field and hidden input field
+                    document.getElementById('dropdownInput').value = tournament.tname;
+                    document.getElementById('selectedTournamentId').value = tournament.id;
+                    document.getElementById("gtnameError").textContent = "";
+                    // Hide the dropdown
+                    document.getElementById('dropdownContent').classList.remove('show');
+                });
+                dropdownContent.appendChild(div);
+            });
+        }
+
+        function filterDropdown() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const items = document.getElementById('dropdownContent').getElementsByTagName('div');
+
+            Array.from(items).forEach(item => {
+                const text = item.textContent || item.innerText;
+                item.style.display = text.toLowerCase().includes(filter) ? '' : 'none';
+            });
+        }
+
+        function toggleDropdown() {
+            document.getElementById('dropdownContent').classList.toggle('show');
+        }
+
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('#dropdownInput')) {
+                const dropdowns = document.getElementsByClassName("dropdown-content");
+                Array.from(dropdowns).forEach(dropdown => {
+                    if (dropdown.classList.contains('show')) {
+                        dropdown.classList.remove('show');
+                    }
+                });
+            }
+        }
+    </script>
 
 </body>
 </html>
