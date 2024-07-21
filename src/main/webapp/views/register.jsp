@@ -3,19 +3,19 @@
 <%@ page language="java" %>
 <%
 
-String user="";
+String jwt="";
 Cookie[] cookies = request.getCookies();
 if (cookies != null) {
     for (Cookie cookie : cookies) {
-        if (cookie.getName().equals("user")) {
+        if (cookie.getName().equals("jwt")) {
             String userCookie = cookie.getValue();
-            user=userCookie;
+            jwt=userCookie;
             break;
         }
     }
 }
 
-if(user!=""){
+if(jwt!=""){
   response.sendRedirect("/");
 }
 %>

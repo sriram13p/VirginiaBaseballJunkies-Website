@@ -2,13 +2,17 @@ package com.bezkoder.springjwt.controllers;
 
 import com.bezkoder.springjwt.models.Game;
 import com.bezkoder.springjwt.models.Registration;
+import com.bezkoder.springjwt.models.Team;
 import com.bezkoder.springjwt.models.Tournament;
 import com.bezkoder.springjwt.payload.request.AddGame;
+import com.bezkoder.springjwt.payload.request.AddPlayers;
 import com.bezkoder.springjwt.payload.request.AddTournament;
 import com.bezkoder.springjwt.payload.response.MessageResponse;
+import com.bezkoder.springjwt.payload.response.PlayersResponse;
 import com.bezkoder.springjwt.repository.TournamentRepo;
 import com.bezkoder.springjwt.service.GameService;
 import com.bezkoder.springjwt.service.RegistrationService;
+import com.bezkoder.springjwt.service.TeamService;
 import com.bezkoder.springjwt.service.TournamentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,6 +43,9 @@ public class AdminController {
     @Autowired
     private RegistrationService registrationService;
 
+    @Autowired
+    private TeamService teamService;
+
     @PostMapping("/tournament")
     @ResponseBody
     public ResponseEntity<?> addTournament(@RequestBody AddTournament addTournament) throws ParseException {
@@ -59,6 +66,7 @@ public class AdminController {
 
         }
     }
+
 
     @PostMapping("/game")
     @ResponseBody
@@ -81,12 +89,36 @@ public class AdminController {
     }
 
 
+    @PostMapping("/players")
+    @ResponseBody
+    public ResponseEntity<?> addplayers(@RequestBody AddPlayers addPlayers){
+        List<Registration> registrations = registrationService.fetchRegistrationsByIDs(addPlayers.getPlayersRegistrationIDs());
+        Game game = gameService.fetchGameById(addPlayers.getGameID());
+        List<Team> teams = new ArrayList<>();
+        for(Registration registration:registrations){
+            
+            Team team=new Team(game,registration);
+            teams.add(team);
+        }
+        String result = teamService.saveAll(teams);
+        if (result.equals("success")) {
+            return getPlayers(game.getId());
+        } else {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error Try Again"));
+
+        }
+    }
+
+
     @GetMapping("/tournament")
     @ResponseBody
     public List<Tournament> allTournments(){
         return tournamentService.allTournments();
 
     }
+
 
     @GetMapping("/game")
     @ResponseBody
@@ -104,12 +136,13 @@ public class AdminController {
         }
     }
 
+
     @GetMapping("/players")
     @ResponseBody
     public ResponseEntity<?> getPlayers(@RequestParam Long id){
         Game game = gameService.fetchGameById(id);
 
-        List<Registration> registrations=
+        PlayersResponse registrations=
                 registrationService.fetchRegisterationsByTournament(game.getTournament().getId());
 
         if (registrations != null) {

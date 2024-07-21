@@ -226,29 +226,120 @@
 </div>
 
 <div id="gameContentView" class="w3-container person">
- <header class="w3-container w3-xlarge">
-        <p class="w3-left">
-          <i class="fa fa-bars w3-hide-large w3-margin-right w3-xlarge" onclick="w3_open()"></i>
-          <strong id="gameValue"></strong>
-        </p>
- </header>
-<div class="w3-bar">
-         <button id="btnAvailable" class="w3-bar-item w3-button w3-round-xxlarge tablink">Available</button>
-         <button id="btnRegistered" class="w3-bar-item w3-button w3-round-xxlarge tablink">Registered</button>
-    </div>
-    <div id="Available" class="w3-container tab" style="display:block">
+     <header class="w3-container w3-xlarge">
+            <p class="w3-left">
+              <i class="fa fa-bars w3-hide-large w3-margin-right w3-xlarge" onclick="w3_open()"></i>
+              <strong id="gameValue"></strong>
+            </p>
+     </header>
+     <div class="w3-bar">
+             <button id="btnAvailable" class="w3-bar-item w3-button w3-round-xxlarge tablink">Available</button>
+             <button id="btnRegistered" class="w3-bar-item w3-button w3-round-xxlarge tablink">Registered</button>
+     </div>
+    <div id="Available" class="w3-container tab w3-responsive" style="display:block">
         <br>
         <div class="error-message" id="error-message-available"></div>
-        <div id="availableContent"></div>
+        <div>
+        <table class="w3-table-all w3-striped" >
+              <thead>
+                <tr class="w3-red">
+                  <th>RID</th>
+                  <th>Child Name</th>
+                  <th>Age</th>
+                  <th>Position</th>
+                  <th>Gender</th>
+                  <th>Jersey Number</th>
+                  <th>Willing to Play Up</th>
+                  <th>Select</th>
+                </tr>
+              </thead>
+              <tbody id="available-data-table">
+              </tbody>
+                </table>
+            <button class="w3-button w3-green w3-margin-top w3-right" id="availableSubmit" onclick="handleAvailableSubmit()">Submit</button>
+        </div>
     </div>
+
     <div id="Registered" class="w3-container tab" style="display:none">
             <br>
             <div class="error-message" id="error-message-registered"></div>
-            <div id="registeredContent"></div>
+            <div>
+              <table class="w3-table-all w3-striped" >
+                           <thead>
+                             <tr class="w3-red">
+                               <th>RID</th>
+                               <th>Child Name</th>
+                               <th>Age</th>
+                               <th>Position</th>
+                               <th>Gender</th>
+                               <th>Jersey Number</th>
+                               <th>Willing to Play Up</th>
+
+                             </tr>
+                           </thead>
+                           <tbody id="registered-data-table">
+                           </tbody>
+                             </table>
+            </div>
     </div>
 </div>
 
 <script>
+let availableData;
+let gameID;
+function handleAvailableSubmit(){
+const checkboxes = document.querySelectorAll('.select-row-available');
+        const selectedIds = [];
+
+        checkboxes.forEach((checkbox, index) => {
+            if (checkbox.checked) {
+                selectedIds.push(availableData[index].id);
+
+                // Remove the row from the table
+                const row = checkbox.closest('tr');
+
+            }
+        });
+
+        var formData = {
+                        playersRegistrationIDs: selectedIds,
+                        gameID: gameID
+                    };
+         $('#error-message-available').text('');
+         $('#error-message-registered').text('');
+        $('#availableSubmit').prop('disabled', true);
+
+                     $.ajax({
+                                            type: 'POST',
+                                            url: '/players', // Replace with your actual API endpoint
+                                            contentType: 'application/json',
+                                            data: JSON.stringify(formData),
+                                            success: function(response,textStatus, jqXHR) {
+
+                                                                    if (jqXHR.status === 200) {
+
+                                                                             $('#error-message-available').text('successfully Saved');
+                                                                             availableData=response.availablePlayers;
+
+                                                                             generatePlayerContent(response);
+
+                                                                    }
+
+                                                                    else {
+                                                                        $('#error-message-available').text('Error,Try Again');
+
+                                                                    }
+                                                                },
+                                                                error: function(xhr, status, error) {
+                                                                    console.error('Error:', error);
+                                                                    $('#error-message-available').text('Failed to Load Data. Please try again later.');
+
+                                                                }
+                            });
+
+
+}
+
 function handleTournamentChange() {
     var selectElement = document.getElementById('gtnamepage');
     var selectedValue = selectElement.value;
@@ -305,20 +396,174 @@ function generateGameCards(games) {
     });
 }
 
+function calculateAge(dob) {
+    // Parse the date of birth string into a Date object
+    const birthDate = new Date(dob);
+    const today = new Date();
+
+    // Calculate the difference in years
+    let age = today.getFullYear() - birthDate.getFullYear();
+
+    // Adjust the age if the birth date hasn't occurred yet this year
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+    const dayDifference = today.getDate() - birthDate.getDate();
+
+    if (monthDifference < 0 || (monthDifference === 0 && dayDifference < 0)) {
+        age--;
+    }
+
+    return age;
+}
+
 function loadGameContent(id,name){
     document.getElementById('gameValue').innerHTML = "# "+id+" - "+name;
 
-    document.getElementById('btnAvailable').click();
+    const availableDiv = $('#available-data-table');
+    availableDiv.empty();
 
-      const availableDiv = $('#availableContent');
-      availableDiv.empty();
+     $('#error-message-available').text('');
 
-      const registeredDiv = $('#registeredContent');
-      registeredDiv.empty();
+    const registeredDiv = $('#registered-data-table');
+    registeredDiv.empty();
     openMail('gameContentView');
     document.getElementById('btnAvailable').click();
 
+    $.ajax({
+                    type: 'GET',
+                    url: '/players?id=' + id, // Append id to the URL
+                    contentType: 'application/json',
+                    success: function(response,textStatus, jqXHR) {
+
+                        if (jqXHR.status === 200) {
+
+                            if(response.length===0){
+                                $('#error-message-available').text('No Players Available');
+                            }
+                            else{
+                                 availableData=response.availablePlayers;
+                                 gameID=id;
+                                 generatePlayerContent(response);
+
+                            }
+
+                        } else {
+                            $('#error-message-available').text('Unexpected response format');
+
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        $('#error-message-available').text('Failed to Load Data. Please try again later.');
+
+                    }
+    });
+
 }
+
+function generatePlayerContent(players){
+    $('#error-message-available').text('');
+    $('#error-message-registered').text('');
+    availablePlayersData = players.availablePlayers;
+    registeredPlayersData = players.registeredPlayers;
+
+    const availableDiv = document.getElementById('available-data-table');
+    availableDiv.innerHTML = '';
+
+    const registeredDiv = document.getElementById('registered-data-table');
+    registeredDiv.innerHTML = '';
+
+    if(availablePlayersData.length===0){
+    $('#error-message-available').text('No Players Available');
+    }
+    else{
+        availablePlayersData.forEach(item => {
+                            const row = document.createElement('tr');
+
+                            const ridCell = document.createElement('td');
+                            ridCell.textContent = item.id;
+                            row.appendChild(ridCell);
+
+                            const nameCell = document.createElement('td');
+                            nameCell.textContent = item.child.cname;
+                            row.appendChild(nameCell);
+
+                            const dobCell = document.createElement('td');
+                            dobCell.textContent = calculateAge(item.child.dob);
+                            row.appendChild(dobCell);
+
+                            const positionCell = document.createElement('td');
+                            positionCell.textContent = item.child.position;
+                            row.appendChild(positionCell);
+
+                            const genderCell = document.createElement('td');
+                            genderCell.textContent = item.child.gender;
+                            row.appendChild(genderCell);
+
+                            const jerseyNoCell = document.createElement('td');
+                            jerseyNoCell.textContent = item.child.jerseyNo;
+                            row.appendChild(jerseyNoCell);
+
+                            const willingToPlayUpCell = document.createElement('td');
+                            willingToPlayUpCell.textContent = item.willingToPlayUp ? 'Yes' : 'No';
+                            row.appendChild(willingToPlayUpCell);
+
+                            const selectCell = document.createElement('td');
+                            const checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.classList.add('select-row-available');
+                            selectCell.appendChild(checkbox);
+                            row.appendChild(selectCell);
+
+                            availableDiv.appendChild(row);
+        });
+    }
+
+       if(registeredPlayersData.length===0){
+        $('#error-message-registered').text('No Players Available');
+        }
+        else{
+            registeredPlayersData.forEach(item => {
+                                const row = document.createElement('tr');
+
+                                const ridCell = document.createElement('td');
+                                ridCell.textContent = item.id;
+                                row.appendChild(ridCell);
+
+                                const nameCell = document.createElement('td');
+                                nameCell.textContent = item.child.cname;
+                                row.appendChild(nameCell);
+
+                                const dobCell = document.createElement('td');
+                                dobCell.textContent = calculateAge(item.child.dob);
+                                row.appendChild(dobCell);
+
+                                const positionCell = document.createElement('td');
+                                positionCell.textContent = item.child.position;
+                                row.appendChild(positionCell);
+
+                                const genderCell = document.createElement('td');
+                                genderCell.textContent = item.child.gender;
+                                row.appendChild(genderCell);
+
+                                const jerseyNoCell = document.createElement('td');
+                                jerseyNoCell.textContent = item.child.jerseyNo;
+                                row.appendChild(jerseyNoCell);
+
+                                const willingToPlayUpCell = document.createElement('td');
+                                willingToPlayUpCell.textContent = item.willingToPlayUp ? 'Yes' : 'No';
+                                row.appendChild(willingToPlayUpCell);
+
+                                registeredDiv.appendChild(row);
+            });
+        }
+
+
+}
+
+
+
+
+
 
 function onloadFunction() {
   document.getElementById('gameContentView').style.display = 'none';
@@ -732,11 +977,11 @@ openTab.click();
 
         document.getElementById('btnRegistered').addEventListener('click', function() {
             openTab('Registered', this);
-            fetchRegistration();
+            //fetchRegistration();
         });
         document.getElementById('btnRegistered').addEventListener('touchstart', function() {
             openTab('Registered', this);
-            fetchRegistration();
+            //fetchRegistration();
         });
 
     function openTab(tabName, element) {

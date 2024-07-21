@@ -60,4 +60,14 @@ public class Registration {
     public void setWillingToPlayUp(boolean willingToPlayUp) {
         this.willingToPlayUp = willingToPlayUp;
     }
+
+    @Override
+    public String toString() {
+        return "Registration{" +
+                "id=" + id +
+                ", child=" + child +
+                ", tournament=" + tournament +
+                ", willingToPlayUp=" + willingToPlayUp +
+                '}';
+    }
 }

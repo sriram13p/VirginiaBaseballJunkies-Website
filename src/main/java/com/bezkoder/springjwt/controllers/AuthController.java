@@ -87,11 +87,6 @@ public class AuthController {
 
       try {
 
-          Cookie userCookie = new Cookie("user", jwtResponse.getId()+"");
-          userCookie.setHttpOnly(true);
-          userCookie.setSecure(true); // Use true if your application is served over HTTPS
-          userCookie.setPath("/");
-          userCookie.setMaxAge(cookieExpirationms); // 1 day
 
           Cookie jwtCookie = new Cookie("jwt", jwt);
           jwtCookie.setHttpOnly(true);
@@ -101,7 +96,7 @@ public class AuthController {
 
         // Add the cookie to the response
           response.addCookie(jwtCookie);
-          response.addCookie(userCookie);
+
       } catch (Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating cookie");
       }

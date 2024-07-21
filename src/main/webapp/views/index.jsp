@@ -3,17 +3,13 @@
 <%@ page language="java" %>
 <%
 
-String user="";
+
 String jwt="";
 Cookie[] cookies = request.getCookies();
 if (cookies != null) {
     for (Cookie cookie : cookies)
     {
-        if (cookie.getName().equals("user")) {
-            String userCookie = cookie.getValue();
-            user=userCookie;
 
-        }
         if (cookie.getName().equals("jwt")) {
                     String jwtCookie = cookie.getValue();
                     jwt=jwtCookie;
@@ -249,9 +245,9 @@ function myFunction() {
 
 // Hide login and signup buttons if user cookie is present
 document.addEventListener("DOMContentLoaded", function() {
-  var user="<%= user %>";
+  var jwt="<%= jwt %>";
 
-  if (user != "") {
+  if (jwt != "") {
       var loginButton = document.querySelector(".tnb-login-btn");
       var signupButton = document.querySelector(".tnb-signup-btn");
       if (loginButton) loginButton.style.display = "none";
