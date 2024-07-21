@@ -240,6 +240,9 @@ function populateDiv() {
       demoContainer.innerHTML = '';
 
       if(${children}.length===0){
+      var tournamentHide = document.getElementById('tournament');
+      tournamentHide.innerHTML = '';
+
             var aTag = document.createElement('a');
                         aTag.href = 'javascript:void(0)';
                         aTag.className = 'w3-bar-item w3-button w3-border-bottom test w3-hover-light-grey';
@@ -253,17 +256,10 @@ function populateDiv() {
                         aTag.appendChild(div1);
                         demoContainer.appendChild(aTag);
 
-                        // Create <div> tag for MainContainer
-                        var div2 = document.createElement('div');
 
-                        div2.className = 'w3-container person';
-
-                        var h5 = document.createElement('h5');
-                        h5.className = 'w3-opacity';
-                        h5.textContent = "Add Child";
 
                         div2.appendChild(h5);
-                        mainContainer.appendChild(div2);
+
 
 
 

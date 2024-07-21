@@ -143,7 +143,8 @@ public class AdminController {
         Game game = gameService.fetchGameById(id);
 
         PlayersResponse registrations=
-                registrationService.fetchRegisterationsByTournament(game.getTournament().getId());
+                registrationService.fetchRegistrationsByTournament(game.getId(),game.getTournament().getId());
+
 
         if (registrations != null) {
             return ResponseEntity.ok(registrations);

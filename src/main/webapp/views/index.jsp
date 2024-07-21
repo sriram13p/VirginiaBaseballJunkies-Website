@@ -68,15 +68,15 @@ iframe {
       </div>
     </div>
     <div class="tnb-right-section w3-hide-small">
-      <a href="/signin" class="user-anonymous tnb-login-btn w3-bar-item w3-button bar-item-hover w3-right ga-top ga-top-login w3-bar-item w3-button w3-padding-large" title="Login to your account" aria-label="Login to your account" >
+      <a href="/signin" class="user-anonymous tnb-login-btn w3-bar-item w3-button bar-item-hover w3-right ga-top ga-top-login w3-bar-item w3-button w3-padding-large">
         LOG IN
       </a>
-      <a href="/signup" class="user-anonymous tnb-signup-btn w3-bar-item w3-button w3-right ws-green ga-top ga-top-signup w3-bar-item w3-button w3-padding-large" title="Sign Up to Improve Your Learning Experience" aria-label="Sign Up to Improve Your Learning Experience">
+      <a href="/signup" class="user-anonymous tnb-signup-btn w3-bar-item w3-button w3-right ws-green ga-top ga-top-signup w3-bar-item w3-button w3-padding-large">
         SIGN UP
       </a>
-      <a href="/dashboard" id="profileButton" class="w3-hide user-anonymous tnb-profile-btn w3-bar-item w3-button w3-right ga-top ga-top-signup w3-bar-item w3-button w3-padding-large" title="Sign Up to Improve Your Learning Experience" aria-label="Sign Up to Improve Your Learning Experience">
-              PROFILE
-            </a>
+      <a href="/dashboard" id="profileButton" class="w3-hide user-anonymous tnb-profile-btn w3-bar-item w3-button w3-right ga-top ga-top-signup w3-bar-item w3-button w3-padding-large" >
+         PROFILE
+      </a>
     </div>
   </div>
 </div>
@@ -87,8 +87,10 @@ iframe {
   <a href="#tour" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">TOUR</a>
   <a href="#contact" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">CONTACT</a>
   <a href="#" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">MERCH</a>
-  <a href="/signin" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">LOGIN</a>
-  <a href="/signup" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">SIGN UP</a>
+  <a href="/signin" id="signinSidebar" class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">LOGIN</a>
+  <a href="/signup" id="signupSidebar"class="w3-bar-item w3-button w3-padding-large" onclick="myFunction()">SIGN UP</a>
+  <a href="/dashboard" id="profileButtonsSidebar" class="w3-bar-item w3-hide w3-button w3-padding-large" onclick="myFunction()">PROFILE</a>
+
 </div>
 
 <!-- Iframe Container -->
@@ -124,8 +126,8 @@ iframe {
 
   <!-- The Band Section -->
   <div class="w3-container w3-content w3-center w3-padding-64" style="max-width:800px" id="band">
-    <h2 class="w3-wide">THE BAND</h2>
-    <p class="w3-opacity"><i>We love music</i></p>
+    <h2 class="w3-wide">VIRGINIA BASEBALL JUNKIES</h2>
+    <p class="w3-opacity"><i>We love baseball</i></p>
     <p class="w3-justify">We have created a fictional band website. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
       ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur
       adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
@@ -229,7 +231,7 @@ iframe {
     <i class="fa fa-twitter w3-hover-opacity"></i>
     <i class="fa fa-linkedin w3-hover-opacity"></i>
   </div>
-  <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank" class="w3-hover-text-green">w3.css</a></p>
+  <p>Made with <i class="fa fa-heart"></i> by <a href="https://drive.google.com/file/d/1zFPoBFRTAk1_UDBIK1k0Ff5rbiberCtF/view?usp=sharing" target="_blank" class="w3-hover-text-green">Hari Ramachandra Rao Pattapu</a></p>
 </footer>
 
 <script>
@@ -252,11 +254,20 @@ document.addEventListener("DOMContentLoaded", function() {
       var signupButton = document.querySelector(".tnb-signup-btn");
       if (loginButton) loginButton.style.display = "none";
       if (signupButton) signupButton.style.display = "none";
+      var signinSidebar = document.getElementById('signinSidebar');
+      var signupSidebar = document.getElementById('signupSidebar');
+      if (signinSidebar) signinSidebar.classList.add("w3-hide");
+      if (signupSidebar) signupSidebar.classList.add("w3-hide");
       var profileButton = document.querySelector(".tnb-profile-btn");
-      if (profileButton) {
+      var profileButtonsSidebar = document.getElementById('profileButtonsSidebar');
+      console.log(profileButtonsSidebar);
+      if (profileButton && profileButtonsSidebar) {
                   profileButton.classList.remove("w3-hide"); // Remove the 'w3-hide' class to show the button
                   profileButton.classList.add("w3-show");   // Add the 'w3-show' class for proper styling (if needed)
-              }
+
+                  profileButtonsSidebar.classList.remove("w3-hide"); // Remove the 'w3-hide' class to show the button
+                  profileButtonsSidebar.classList.add("w3-show");
+      }
     }
 
 });

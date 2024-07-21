@@ -323,6 +323,7 @@ const checkboxes = document.querySelectorAll('.select-row-available');
 
                                                                              generatePlayerContent(response);
 
+
                                                                     }
 
                                                                     else {
@@ -336,6 +337,7 @@ const checkboxes = document.querySelectorAll('.select-row-available');
 
                                                                 }
                             });
+                            $('#availableSubmit').prop('disabled', false);
 
 
 }

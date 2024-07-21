@@ -102,9 +102,9 @@ public class UserController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate dob = LocalDate.parse(dobString, formatter);
         int age = calculateAge(dob, LocalDate.now());
-        int ageIncrement=age+1;
+
         try {
-            List<Tournament> tournaments=tournamentService.fetchTournament(ageIncrement+"",id);
+            List<Tournament> tournaments=tournamentService.fetchTournament(age+"",id);
             if (tournaments != null) {
                 return ResponseEntity.ok(tournaments);
             } else {

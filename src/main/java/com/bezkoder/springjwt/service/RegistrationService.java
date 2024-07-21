@@ -1,6 +1,7 @@
 package com.bezkoder.springjwt.service;
 
 import com.bezkoder.springjwt.models.Registration;
+import com.bezkoder.springjwt.models.Team;
 import com.bezkoder.springjwt.models.Tournament;
 import com.bezkoder.springjwt.payload.response.PlayersResponse;
 import com.bezkoder.springjwt.repository.RegistrationRepository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,20 +41,29 @@ public class RegistrationService {
         return registrations;
     }
 
-    public PlayersResponse fetchRegisterationsByTournament(Long id) {
+    public PlayersResponse fetchRegistrationsByTournament(Long gid, Long id) {
+
+        List<Team> teams=teamRepository.findByGameId(gid);
+        // Retrieve all players registered for the game
+        List<Registration> registeredPlayers = new ArrayList<>();
+        for(Team team:teams){
+            registeredPlayers.add(team.getRegistration());
+        }
+
+
+        // Retrieve all registrations for the tournament
         List<Registration> allRegistrations = registrationRepository.findByTournamentId(id);
 
-        // Fetch all registration IDs that are already in the Teams table for the given tournament ID
-        List<Long> registrationIdsInTeams = teamRepository.findRegistrationIdsByTournamentId(id);
-
-        // Separate available and registered players
+        // Separate available players (those not registered for the game)
         List<Registration> availablePlayers = new ArrayList<>();
-        List<Registration> registeredPlayers = new ArrayList<>();
+
+        // Create a set of registered player IDs for faster lookup
+        Set<Long> registeredPlayerIds = registeredPlayers.stream()
+                .map(reg -> reg.getChild().getId())
+                .collect(Collectors.toSet());
 
         for (Registration registration : allRegistrations) {
-            if (registrationIdsInTeams.contains(registration.getId())) {
-                registeredPlayers.add(registration);
-            } else {
+            if (!registeredPlayerIds.contains(registration.getChild().getId())) {
                 availablePlayers.add(registration);
             }
         }

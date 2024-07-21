@@ -1,5 +1,6 @@
 package com.bezkoder.springjwt.repository;
 
+import com.bezkoder.springjwt.models.Registration;
 import com.bezkoder.springjwt.models.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +18,8 @@ public interface TeamRepository extends JpaRepository<Team,Long> {
     List<Team> findByGameIdIn(List<Long> gameIds);
 
     List<Team> findByRegistrationIdIn(List<Long> registrationIds);
+
+    List<Team> findByGameId(Long gameId);
+
+
 }
