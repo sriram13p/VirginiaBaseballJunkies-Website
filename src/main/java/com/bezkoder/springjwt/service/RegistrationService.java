@@ -35,7 +35,7 @@ public class RegistrationService {
 
     public List<Registration> fetchRegisterationByChild(Long id) {
         List<Registration> registrations = registrationRepository.findByChildId(id);
-        registrations.forEach(registration -> registration.setChild(null));
+        registrations.forEach(registration -> registration.getChild().setUser(null));
         return registrations;
     }
 

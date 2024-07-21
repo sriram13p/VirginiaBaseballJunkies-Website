@@ -24,4 +24,12 @@ public class TeamService {
             return "Error Occured while saving, Try Again Later";
         }
     }
+
+    public List<Team> findTeamsByGameIds(List<Long> gameIds) {
+        return teamRepository.findByGameIdIn(gameIds);
+    }
+
+    public List<Team> findTeamsByRegistrationIds(List<Long> registrationIds) {
+        return teamRepository.findByRegistrationIdIn(registrationIds);
+    }
 }

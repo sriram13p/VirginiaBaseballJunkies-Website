@@ -6,6 +6,7 @@ import com.bezkoder.springjwt.repository.GameRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,5 +31,13 @@ public class GameService {
 
     public Game fetchGameById(Long id) {
         return gameRepository.getReferenceById(id);
+    }
+
+    public List<Game> findGamesByTournamentIds(List<Long> tournamentIds) {
+        return gameRepository.findByTournamentIdIn(tournamentIds);
+    }
+
+    public List<Game> findGamesByIds(ArrayList<Long> gameIds) {
+        return gameRepository.findByIdIn(gameIds);
     }
 }

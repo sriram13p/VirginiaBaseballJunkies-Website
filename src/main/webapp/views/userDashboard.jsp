@@ -15,6 +15,67 @@ html,body,h1,h2,h3,h4,h5 {font-family: "RobotoDraft", "Roboto", sans-serif;}
         }
 
 </style>
+<style>
+        .w3-down::before {
+            content: '\25BC'; /* Down arrow */
+            color: #000000; /* Black color for the down arrow */
+        }
+
+        .w3-up::before {
+            content: '\25B2'; /* Up arrow */
+            color: #000000; /* Black color for the up arrow */
+        }
+
+        .card-header {
+            cursor: pointer;
+            border-radius: 8px 8px 0 0; /* Curve only the top corners */
+            background-color: #ffffff; /* Default header color */
+            color: #000000; /* Default text color */
+            padding: 10px; /* Add some padding for better appearance */
+            transition: background-color 0.3s ease; /* Smooth transition for background color */
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between; /* Space between name and arrow */
+            align-items: center; /* Align items vertically center */
+        }
+
+        .w3-card-4 {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden; /* Ensure content doesn't overflow card borders */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        .team-details {
+            display: none; /* Hide team details by default */
+            margin-top: 10px;
+        }
+
+        .card-expanded .team-details {
+            display: block; /* Show team details when expanded */
+        }
+
+        .card-expanded .card-header {
+            background-color: red; /* Change header color when expanded */
+            color: #ffffff; /* Change text color for better contrast */
+        }
+    </style>
  <style>
         body {
             font-family: Arial, sans-serif;
@@ -134,6 +195,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "RobotoDraft", "Roboto", sans-serif;}
     <div class="w3-bar">
          <button id="btnAvailable" class="w3-bar-item w3-button w3-round-xxlarge tablink w3-red">Available</button>
          <button id="btnRegistered" class="w3-bar-item w3-button w3-round-xxlarge tablink">Registered</button>
+         <button id="btnGames" class="w3-bar-item w3-button w3-round-xxlarge tablink">Games</button>
     </div>
     <div id="Available" class="w3-container tab" style="display:block">
         <br>
@@ -145,6 +207,14 @@ html,body,h1,h2,h3,h4,h5 {font-family: "RobotoDraft", "Roboto", sans-serif;}
         <br>
         <div class="error-message" id="error-message-registered"></div>
         <div id="registeredContent"></div>
+    </div>
+
+    <div id="Games" class="w3-container tab" style="display:none">
+            <br>
+            <div class="error-message" id="error-message-games"></div>
+            <div id="gamesContent">
+            <strong>Games</strong>
+            </div>
     </div>
 
 </div>
@@ -447,8 +517,110 @@ function tournament(id) {
 
   childIDHolder=id;
   fetchTounrnament(id);
+  fetchGames(id);
 
 }
+
+function fetchGames(id){
+ const registeredDiv = $('#gamesContent');
+   registeredDiv.empty();
+ $('#error-message-games').text("");
+        $.ajax({
+            type: 'GET',
+            url: '/games?id=' + id, // Append id to the URL
+            contentType: 'application/json',
+            success: function(response,textStatus, jqXHR) {
+
+                if (jqXHR.status === 200) {
+
+                    if(response.length===0){
+                        $('#error-message-games').text('No Games Available');
+                    }
+                    else{
+                         generateGameCards(response);
+                    }
+
+                } else {
+                    $('#error-message-games').text('Unexpected response format');
+
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                $('#error-message-games').text('Failed to Load Data. Please try again later.');
+
+            }
+        });
+
+}
+
+function generateCard(game) {
+    // Create card header with name, location, and date
+    var cardHeader =
+        '<header class="card-header">' +
+            '<div class="header-top">' +
+                '<span><strong>' + game.gname + '</strong></span>' +
+                '<i class="w3-xlarge w3-margin-right w3-text-black w3-right w3-down" onclick="toggleCard(this)"></i>' +
+            '</div>' +
+            '<div>' +
+                '<div>' +
+                    '<i class="fa fa-map-marker"></i> ' + game.location +
+                '</div>' +
+                '<div>' +
+                    '<i class="fa fa-calendar"></i> ' + new Date(game.gameDate).toLocaleDateString() +
+                '</div>' +
+                '<div>' +
+                    '<i class="fa fa-trophy"></i> ' + game.tournament.tname +
+                '</div>' +
+            '</div>' +
+        '</header>';
+
+    // Create teams details in a table
+    var teamDetails = game.teams.map(function(team) {
+        return '<tr>' +
+                   '<td>' + team.registration.child.cname + '</td>' +
+                   '<td>' + team.registration.child.position + '</td>' +
+                   '<td>' + team.registration.child.jerseyNo + '</td>' +
+               '</tr>';
+    }).join('');
+
+    // Combine header and body
+    return (
+        '<div class="w3-card-4 w3-margin-bottom">' +
+            cardHeader +
+            '<div class="team-details">' +
+                '<div class="w3-container">' +
+                    '<h3>Team Details</h3>' +
+                    '<table>' +
+                        '<thead>' +
+                            '<tr>' +
+                                '<th>Child Name</th>' +
+                                '<th>Position</th>' +
+                                '<th>Jersey Number</th>' +
+                            '</tr>' +
+                        '</thead>' +
+                        '<tbody>' +
+                            teamDetails +
+                        '</tbody>' +
+                    '</table>' +
+                    '<br>' +
+                '</div>' +
+            '</div>' +
+        '</div>'
+    );
+}
+
+
+function generateGameCards(games){
+    const container = document.getElementById('gamesContent');
+            container.innerHTML = games.map(generateCard).join('');
+}
+function toggleCard(icon) {
+        const card = icon.closest('.w3-card-4');
+        card.classList.toggle('card-expanded');
+        icon.classList.toggle('w3-down');
+        icon.classList.toggle('w3-up');
+    }
 
 function fetchTounrnament(id){
 
@@ -480,6 +652,7 @@ function fetchTounrnament(id){
             }
         });
 }
+
 function convertIsoToDateString(isoString) {
     var date = new Date(isoString);
 
@@ -572,6 +745,15 @@ function registerTournament(tournamentId,id) {
     document.getElementById('btnRegistered').addEventListener('touchstart', function() {
         openTab('Registered', this);
         fetchRegistration();
+    });
+
+    document.getElementById('btnGames').addEventListener('click', function() {
+            openTab('Games', this);
+           //fetchRegistration();
+    });
+    document.getElementById('btnGames').addEventListener('touchstart', function() {
+            openTab('Games', this);
+           // fetchRegistration();
     });
 
 function openTab(tabName, element) {

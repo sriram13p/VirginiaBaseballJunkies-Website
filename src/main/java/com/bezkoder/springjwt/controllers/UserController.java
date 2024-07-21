@@ -1,9 +1,6 @@
 package com.bezkoder.springjwt.controllers;
 
-import com.bezkoder.springjwt.models.Child;
-import com.bezkoder.springjwt.models.Registration;
-import com.bezkoder.springjwt.models.Tournament;
-import com.bezkoder.springjwt.models.User;
+import com.bezkoder.springjwt.models.*;
 import com.bezkoder.springjwt.payload.request.AddChildRequest;
 
 import com.bezkoder.springjwt.payload.request.RegistrationDTO;
@@ -12,9 +9,7 @@ import com.bezkoder.springjwt.repository.ChildRepository;
 import com.bezkoder.springjwt.repository.TournamentRepo;
 import com.bezkoder.springjwt.repository.UserRepository;
 import com.bezkoder.springjwt.security.services.UserDetailsImpl;
-import com.bezkoder.springjwt.service.ChildService;
-import com.bezkoder.springjwt.service.RegistrationService;
-import com.bezkoder.springjwt.service.TournamentService;
+import com.bezkoder.springjwt.service.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,7 +23,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @PreAuthorize("hasRole('USER')")
@@ -51,6 +47,12 @@ public class UserController {
 
     @Autowired
     private RegistrationService registrationService;
+
+    @Autowired
+    private TeamService teamService;
+
+    @Autowired
+    private GameService gameService;
 
     @PostMapping("/addChild")
     @ResponseBody
@@ -157,5 +159,64 @@ public class UserController {
         }
     }
 
+    @GetMapping("/games")
+    @ResponseBody
+    public ResponseEntity<?> fetchGames(@RequestParam Long id) {
+        try {
+            // Fetch registrations by child ID
+            List<Registration> registrations = registrationService.fetchRegisterationByChild(id);
+
+            // Extract registration IDs from registrations
+            List<Long> registrationIds = registrations.stream()
+                    .map(Registration::getId)
+                    .collect(Collectors.toList());
+
+            // Fetch teams by registration IDs
+            List<Team> teamsByRegistrationIds = teamService.findTeamsByRegistrationIds(registrationIds);
+
+            // Extract game IDs from the fetched teams
+            List<Long> gameIds = teamsByRegistrationIds.stream()
+                    .map(team -> team.getGame().getId())
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            // Fetch teams by game IDs
+            List<Team> teamsByGameIds = teamService.findTeamsByGameIds(gameIds);
+
+            // Combine both sets of teams
+            Set<Team> combinedTeams = new HashSet<>(teamsByRegistrationIds);
+            combinedTeams.addAll(teamsByGameIds);
+
+            // Group teams by game ID
+            Map<Long, List<Team>> teamsByGameMap = combinedTeams.stream()
+                    .collect(Collectors.groupingBy(team -> team.getGame().getId()));
+
+            // Fetch game details based on game IDs
+            List<Game> games = gameService.findGamesByIds(new ArrayList<>(teamsByGameMap.keySet()));
+
+            // Prepare the final response structure
+            List<Map<String, Object>> response = games.stream().map(game -> {
+                Map<String, Object> gameMap = new HashMap<>();
+                gameMap.put("id", game.getId());
+                gameMap.put("gname", game.getGname());
+                gameMap.put("location", game.getLocation());
+                gameMap.put("gameDate", game.getGameDate());
+                gameMap.put("tournament", game.getTournament());
+
+                // Get the teams for this game
+                List<Team> teams = teamsByGameMap.get(game.getId());
+                gameMap.put("teams", teams);
+
+                return gameMap;
+            }).collect(Collectors.toList());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch data, try again later");
+        }
+
+
+    }
 
 }

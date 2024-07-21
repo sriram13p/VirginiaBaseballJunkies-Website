@@ -14,4 +14,7 @@ public interface TeamRepository extends JpaRepository<Team,Long> {
     @Query("SELECT t.registration.id FROM Team t WHERE t.game.tournament.id = :tournamentId")
     List<Long> findRegistrationIdsByTournamentId(@Param("tournamentId") Long tournamentId);
 
+    List<Team> findByGameIdIn(List<Long> gameIds);
+
+    List<Team> findByRegistrationIdIn(List<Long> registrationIds);
 }
